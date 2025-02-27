@@ -52,7 +52,6 @@ export class User {
     user.passwordHash = dto.passwordHash;
     user.login = dto.login;
     user.isEmailConfirmed = false;
-
     return user as UserDocument;
   }
 
