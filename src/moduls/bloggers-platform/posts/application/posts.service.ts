@@ -9,6 +9,10 @@ import {
 import { PostsRepository } from '../infrastructure/posts-repository';
 import { DeletionStatus } from '../../../user-accounts/domain/user.entity';
 import { Blog, BlogModelType } from '../../blogs/domain/blog.entity';
+import {
+  BadRequestDomainException,
+  NotFoundDomainException,
+} from '../../../../core/exceptions/domain-exceptions';
 
 @Injectable()
 export class PostsService {
@@ -27,8 +31,9 @@ export class PostsService {
     });
 
     if (!blog) {
-      throw new NotFoundException('Blog not found');
+      throw BadRequestDomainException.create('blog not found', 'blogId');
     }
+
     const post = this.postModel.createInstance({
       title: dto.title,
       shortDescription: dto.shortDescription,
