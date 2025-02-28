@@ -9,6 +9,7 @@ import {
   Post,
   Put,
   Query,
+  UseGuards,
 } from '@nestjs/common';
 import { CreatePostDomainDto, UpdatePostDto } from '../dto/create-post.dto';
 import { PostsViewDto } from './view-dto/posts.view-dto';
@@ -16,6 +17,8 @@ import { PostsService } from '../application/posts.service';
 import { PostsQueryRepository } from '../infrastructure/query/posts.query-repository';
 import { GetPostsQueryParams } from './input-dto/get-posts-query-params.input-dto';
 import { PaginatedViewDto } from '../../../../core/dto/base.paginated.view-dto';
+import { BasicAuthGuard } from '../../../user-accounts/guards/basic/basic-auth.guard';
+import { ApiBasicAuth } from '@nestjs/swagger';
 
 @Controller('posts')
 export class PostsController {
@@ -25,6 +28,8 @@ export class PostsController {
   ) {}
 
   @Post()
+  @UseGuards(BasicAuthGuard)
+  @ApiBasicAuth('BasicAuth')
   async createPost(@Body() body: CreatePostDomainDto): Promise<PostsViewDto> {
     const postId = await this.postService.createPost(body);
     return this.postQueryRepository.getByIdOrNotFoundFail(postId);
@@ -42,11 +47,15 @@ export class PostsController {
     return this.postQueryRepository.getByIdOrNotFoundFail(id);
   }
   @Delete(':id')
+  @UseGuards(BasicAuthGuard)
+  @ApiBasicAuth('BasicAuth')
   @HttpCode(HttpStatus.NO_CONTENT)
   async deletePost(@Param('id') id: string): Promise<void> {
     await this.postService.deletePost(id);
   }
   @Put(':id')
+  @UseGuards(BasicAuthGuard)
+  @ApiBasicAuth('BasicAuth')
   @HttpCode(HttpStatus.NO_CONTENT)
   async updatePost(
     @Param('id') id: string,
