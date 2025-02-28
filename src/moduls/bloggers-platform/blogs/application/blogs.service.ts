@@ -18,6 +18,7 @@ export class BlogsService {
       description: dto.description,
       websiteUrl: dto.websiteUrl,
     });
+
     await this.blogsRepository.save(blog);
     return blog._id.toString();
   }

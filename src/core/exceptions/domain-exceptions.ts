@@ -42,6 +42,7 @@ export const BadRequestDomainException = ConcreteDomainExceptionFactory(
   'Bad Request',
   DomainExceptionCode.BadRequest,
 );
+
 export const ForbiddenDomainException = ConcreteDomainExceptionFactory(
   'Forbidden',
   DomainExceptionCode.Forbidden,

@@ -9,6 +9,7 @@ import {
   HttpCode,
   HttpStatus,
   Put,
+  UseGuards,
 } from '@nestjs/common';
 
 import { BlogsViewDto } from './view-dto/blogs.view-dto';
@@ -23,6 +24,8 @@ import { PostsViewDto } from '../../posts/api/view-dto/posts.view-dto';
 import { PostsService } from '../../posts/application/posts.service';
 import { PostsQueryRepository } from '../../posts/infrastructure/query/posts.query-repository';
 import { GetPostsQueryParams } from '../../posts/api/input-dto/get-posts-query-params.input-dto';
+import { BasicAuthGuard } from '../../../user-accounts/guards/basic/basic-auth.guard';
+import { ApiBasicAuth } from '@nestjs/swagger';
 
 @Controller('blogs')
 export class BlogsController {
@@ -52,12 +55,16 @@ export class BlogsController {
   }
 
   @Post()
+  @UseGuards(BasicAuthGuard)
+  @ApiBasicAuth('BasicAuth')
   async createBlog(@Body() body: CreateBlogDomainDto): Promise<BlogsViewDto> {
     const blogId = await this.blogService.createBlog(body);
     return this.blogQueryRepository.getByIdOrNotFoundFail(blogId);
   }
 
   @Post(':id/posts')
+  @UseGuards(BasicAuthGuard)
+  @ApiBasicAuth('BasicAuth')
   async createPostForBlog(
     @Param('id') blogId: string,
     @Body() body: CreatePostDomainDto,
@@ -67,12 +74,16 @@ export class BlogsController {
   }
 
   @Delete(':id')
+  @UseGuards(BasicAuthGuard)
+  @ApiBasicAuth('BasicAuth')
   @HttpCode(HttpStatus.NO_CONTENT)
   async deleteBlog(@Param('id') id: string): Promise<void> {
     await this.blogService.deleteBlog(id);
   }
 
   @Put(':id')
+  @UseGuards(BasicAuthGuard)
+  @ApiBasicAuth('BasicAuth')
   @HttpCode(HttpStatus.NO_CONTENT)
   async updateBlog(
     @Param('id') id: string,

@@ -35,6 +35,7 @@ export class UsersController {
   ): Promise<PaginatedViewDto<UserViewDto[]>> {
     return this.usersQueryRepository.getAll(query);
   }
+
   @Post()
   async createUser(@Body() body: CreateUserInputDto): Promise<UserViewDto> {
     const userId = await this.usersService.createUser(body);
