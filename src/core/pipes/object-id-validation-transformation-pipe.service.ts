@@ -30,7 +30,6 @@ export class ObjectIdValidationTransformationPipe implements PipeTransform {
 export class ObjectIdValidationPipe implements PipeTransform {
   transform(value: any, metadata: ArgumentMetadata): any {
     // Проверяем, что тип данных в декораторе — ObjectId
-
     if (!isValidObjectId(value)) {
       throw BadRequestDomainException.create(
         `Invalid ObjectId: ${value}`,

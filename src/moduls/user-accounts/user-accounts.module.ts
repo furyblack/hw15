@@ -30,6 +30,7 @@ import { SecurityDevicesController } from './api/security-devices.controller';
     MongooseModule.forFeature([{ name: User.name, schema: UserSchema }]),
     NotificationsModule,
   ],
+
   controllers: [UsersController, AuthController, SecurityDevicesController],
   providers: [
     UsersService,
