@@ -9,10 +9,7 @@ import {
 import { PostsRepository } from '../infrastructure/posts-repository';
 import { DeletionStatus } from '../../../user-accounts/domain/user.entity';
 import { Blog, BlogModelType } from '../../blogs/domain/blog.entity';
-import {
-  BadRequestDomainException,
-  NotFoundDomainException,
-} from '../../../../core/exceptions/domain-exceptions';
+import { BadRequestDomainException } from '../../../../core/exceptions/domain-exceptions';
 
 @Injectable()
 export class PostsService {
