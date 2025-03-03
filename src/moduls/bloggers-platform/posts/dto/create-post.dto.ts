@@ -17,7 +17,6 @@ export class CreatePostDomainDto {
   @Trim()
   content: string;
 
-  @IsString()
   blogId: string;
 
   blogName: string;

@@ -1,4 +1,4 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Post, PostModelType } from '../domain/post';
 import {
@@ -50,8 +50,10 @@ export class PostsService {
       _id: blogId,
       deletionStatus: DeletionStatus.NotDeleted,
     });
+    console.log('blogId type:', typeof blogId, 'value:', blogId);
+
     if (!blogExists) {
-      throw new NotFoundException('Blog not found');
+      throw BadRequestDomainException.create('blog not found', 'blogId');
     }
     const blog = await this.blogModel.findOne({
       _id: blogId,

@@ -62,6 +62,7 @@ export class BlogsController {
     return this.blogQueryRepository.getByIdOrNotFoundFail(blogId);
   }
 
+  //
   @Post(':id/posts')
   @UseGuards(BasicAuthGuard)
   @ApiBasicAuth('BasicAuth')
