@@ -11,7 +11,7 @@ import {
   Query,
   UseGuards,
 } from '@nestjs/common';
-import { CreatePostDomainDto, UpdatePostDto } from '../dto/create-post.dto';
+import { CreatePostInputDto, UpdatePostDto } from '../dto/create-post.dto';
 import { PostsViewDto } from './view-dto/posts.view-dto';
 import { PostsService } from '../application/posts.service';
 import { PostsQueryRepository } from '../infrastructure/query/posts.query-repository';
@@ -30,7 +30,7 @@ export class PostsController {
   @Post()
   @UseGuards(BasicAuthGuard)
   @ApiBasicAuth('BasicAuth')
-  async createPost(@Body() body: CreatePostDomainDto): Promise<PostsViewDto> {
+  async createPost(@Body() body: CreatePostInputDto): Promise<PostsViewDto> {
     const postId = await this.postService.createPost(body);
     return this.postQueryRepository.getByIdOrNotFoundFail(postId);
   }

@@ -19,7 +19,7 @@ import { BlogsQueryRepository } from '../infrastructure/query/blogs.query-reposi
 import { BlogsService } from '../application/blogs.service';
 import { PaginatedViewDto } from '../../../../core/dto/base.paginated.view-dto';
 import { CreateBlogDomainDto } from '../dto/create-user.domain.dto';
-import { CreatePostDomainDto } from '../../posts/dto/create-post.dto';
+import { CreatePostForBlogInputDto } from '../../posts/dto/create-post.dto';
 import { PostsViewDto } from '../../posts/api/view-dto/posts.view-dto';
 import { PostsService } from '../../posts/application/posts.service';
 import { PostsQueryRepository } from '../../posts/infrastructure/query/posts.query-repository';
@@ -68,7 +68,7 @@ export class BlogsController {
   @ApiBasicAuth('BasicAuth')
   async createPostForBlog(
     @Param('id') blogId: string,
-    @Body() body: CreatePostDomainDto,
+    @Body() body: CreatePostForBlogInputDto,
   ): Promise<PostsViewDto> {
     const postId = await this.postService.createPostForBlog(blogId, body);
     return this.postQueryRepository.getByIdOrNotFoundFail(postId);

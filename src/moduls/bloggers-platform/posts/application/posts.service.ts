@@ -2,7 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Post, PostModelType } from '../domain/post';
 import {
-  CreatePostDomainDto,
+  CreatePostForBlogInputDto,
   CreatePostDto,
   UpdatePostDto,
 } from '../dto/create-post.dto';
@@ -44,7 +44,7 @@ export class PostsService {
 
   async createPostForBlog(
     blogId: string,
-    dto: CreatePostDomainDto,
+    dto: CreatePostForBlogInputDto,
   ): Promise<string> {
     const blogExists = await this.blogModel.exists({
       _id: blogId,
