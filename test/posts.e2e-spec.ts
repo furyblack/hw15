@@ -152,6 +152,7 @@ describe('posts', () => {
       blogId: createdBlog.id,
       blogName: createdBlog.name,
     };
+
     //обновляем пост
     await postTestManager.updatePost(createdPost.id, updatedBody);
 

@@ -59,7 +59,8 @@ export class PostsController {
   @HttpCode(HttpStatus.NO_CONTENT)
   async updatePost(
     @Param('id') id: string,
-    @Body() body: UpdatePostDto,
+    @Body()
+    body: UpdatePostDto,
   ): Promise<PostsViewDto> {
     const postId = await this.postService.updatePost(id, body);
     return this.postQueryRepository.getByIdOrNotFoundFail(postId);

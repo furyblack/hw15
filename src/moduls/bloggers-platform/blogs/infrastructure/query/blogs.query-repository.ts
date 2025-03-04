@@ -23,6 +23,7 @@ export class BlogsQueryRepository {
     }
     return BlogsViewDto.mapToView(blog);
   }
+
   async getAll(
     query: GetBlogsQueryParams,
   ): Promise<PaginatedViewDto<BlogsViewDto[]>> {
