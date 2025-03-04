@@ -10,6 +10,7 @@ import { PostsController } from './posts/api/posts.controller';
 import { PostsService } from './posts/application/posts.service';
 import { PostsQueryRepository } from './posts/infrastructure/query/posts.query-repository';
 import { PostsRepository } from './posts/infrastructure/posts-repository';
+import { BlogIsExistConstraint } from './blogs/decorators/blog-is-existing';
 
 @Module({
   imports: [
@@ -26,6 +27,7 @@ import { PostsRepository } from './posts/infrastructure/posts-repository';
     PostsService,
     PostsQueryRepository,
     PostsRepository,
+    BlogIsExistConstraint,
   ],
   exports: [MongooseModule],
 })

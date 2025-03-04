@@ -89,6 +89,7 @@ export class BlogsController {
     @Param('id') id: string,
     @Body() body: UpdateBlogInputDto,
   ): Promise<BlogsViewDto> {
+    console.log('  async updateBlog(\n ');
     const blogId = await this.blogService.updateBlog(id, body);
     return this.blogQueryRepository.getByIdOrNotFoundFail(blogId);
   }

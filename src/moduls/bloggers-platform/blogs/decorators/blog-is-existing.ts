@@ -6,7 +6,7 @@ import {
   ValidatorConstraint,
   ValidatorConstraintInterface,
 } from 'class-validator';
-import { BlogsQueryRepository } from '../infrastructure/query/blogs.query-repository';
+import { BlogsRepository } from '../infrastructure/blogs-repository';
 
 export function BlogIsExist(
   property?: string,
@@ -27,11 +27,12 @@ export function BlogIsExist(
 @ValidatorConstraint({ name: 'BlogIsExist', async: true })
 @Injectable()
 export class BlogIsExistConstraint implements ValidatorConstraintInterface {
-  constructor(private readonly blogsQueryRepository: BlogsQueryRepository) {}
+  constructor(private readonly blogRepository: BlogsRepository) {}
 
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   async validate(value: any, args: ValidationArguments): Promise<boolean> {
-    const blog = await this.blogsQueryRepository.getByIdOrNotFoundFail(value);
+    console.log('validator ');
+    const blog = await this.blogRepository.findById(value);
     return !!blog;
   }
 

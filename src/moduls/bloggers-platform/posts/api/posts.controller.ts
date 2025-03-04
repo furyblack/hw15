@@ -35,6 +35,18 @@ export class PostsController {
     return this.postQueryRepository.getByIdOrNotFoundFail(postId);
   }
 
+  // @Post(':id/comments')
+  // @HttpCode(HttpStatus.CREATED)
+  // @UseGuards(JwtAuthGuard)
+  // async createComment(
+  //   // userId: string,
+  //   // postId: string,
+  //   @Body() body: CommentInputDto,
+  // ): Promise<OutputCommentType> {
+  //   const content = body.content;
+  //   return this.postQueryRepository.getByIdOrNotFoundFail(content);
+  // }
+
   @Get()
   async getAll(
     @Query() query: GetPostsQueryParams,
@@ -62,6 +74,7 @@ export class PostsController {
     @Body()
     body: UpdatePostDto,
   ): Promise<PostsViewDto> {
+    console.log('123123123123');
     const postId = await this.postService.updatePost(id, body);
     return this.postQueryRepository.getByIdOrNotFoundFail(postId);
   }
