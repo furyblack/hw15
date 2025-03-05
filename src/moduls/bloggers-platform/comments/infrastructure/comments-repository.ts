@@ -1,4 +1,3 @@
-// src/moduls/bloggers-platform/comments/infrastructure/comments-repository.ts
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import {

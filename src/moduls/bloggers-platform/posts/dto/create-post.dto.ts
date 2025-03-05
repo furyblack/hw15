@@ -21,6 +21,7 @@ export class CreatePostForBlogInputDto {
 
 export class CreatePostInputDto extends CreatePostForBlogInputDto {
   @IsString()
+  @BlogIsExist()
   @Trim()
   blogId: string;
 }
