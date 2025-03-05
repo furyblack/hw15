@@ -1,9 +1,9 @@
-import { Trim } from '../../../../core/decorators/transform/trim';
 import { IsString, Length } from 'class-validator';
+import { Trim } from '../../../../core/decorators/transform/trim';
 
 export class CommentInputDto {
-  @Trim()
   @IsString()
-  @Length(30, 300)
+  @Length(20, 300)
+  @Trim()
   content: string;
 }

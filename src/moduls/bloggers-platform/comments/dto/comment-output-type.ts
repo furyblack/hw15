@@ -1,16 +1,25 @@
-import { LikeStatus } from '../../likes-types/likes-types';
+import { CommentDocument } from '../domain/comment.entity';
 
-export type OutputCommentType = {
+export class CommentsViewDto {
   id: string;
   content: string;
   commentatorInfo: {
     userId: string;
-    userLogin: string;
   };
-  createdAt: string;
+  createdAt: Date;
   likesInfo: {
     likesCount: number;
     dislikesCount: number;
-    myStatus: LikeStatus;
+    myStatus: string;
   };
-};
+
+  static mapToView(comment: CommentDocument): CommentsViewDto {
+    return {
+      id: comment._id.toString(),
+      content: comment.content,
+      commentatorInfo: comment.commentatorInfo,
+      createdAt: comment.createdAt,
+      likesInfo: comment.likesInfo,
+    };
+  }
+}

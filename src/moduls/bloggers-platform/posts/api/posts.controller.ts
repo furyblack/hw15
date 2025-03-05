@@ -19,12 +19,19 @@ import { GetPostsQueryParams } from './input-dto/get-posts-query-params.input-dt
 import { PaginatedViewDto } from '../../../../core/dto/base.paginated.view-dto';
 import { BasicAuthGuard } from '../../../user-accounts/guards/basic/basic-auth.guard';
 import { ApiBasicAuth } from '@nestjs/swagger';
+import { CommentInputDto } from '../../comments/dto/comment-input-dto';
+import { CurrentUser } from '../../../user-accounts/decarators/user-decorators';
+import { CommentsService } from '../../comments/application/comments.service';
+import { CommentsViewDto } from '../../comments/dto/comment-output-type';
+import { JwtAuthGuard } from '../../../user-accounts/guards/bearer/jwt-auth.guard';
 
 @Controller('posts')
 export class PostsController {
   constructor(
     private postQueryRepository: PostsQueryRepository,
     private postService: PostsService,
+    private commentService: CommentsService,
+    private readonly commentsService: CommentsService,
   ) {}
 
   @Post()
@@ -35,17 +42,16 @@ export class PostsController {
     return this.postQueryRepository.getByIdOrNotFoundFail(postId);
   }
 
-  // @Post(':id/comments')
-  // @HttpCode(HttpStatus.CREATED)
-  // @UseGuards(JwtAuthGuard)
-  // async createComment(
-  //   // userId: string,
-  //   // postId: string,
-  //   @Body() body: CommentInputDto,
-  // ): Promise<OutputCommentType> {
-  //   const content = body.content;
-  //   return this.postQueryRepository.getByIdOrNotFoundFail(content);
-  // }
+  @Post(':id/comments')
+  @UseGuards(JwtAuthGuard)
+  @HttpCode(HttpStatus.CREATED)
+  async createComment(
+    @Param('id') postId: string,
+    @Body() dto: CommentInputDto,
+    @CurrentUser() userId: string,
+  ): Promise<CommentsViewDto> {
+    return this.commentsService.createComment(postId, userId, dto);
+  }
 
   @Get()
   async getAll(
