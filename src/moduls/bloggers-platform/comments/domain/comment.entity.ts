@@ -13,6 +13,7 @@ export class Comment {
   @Prop({ type: Object, required: true })
   commentatorInfo: {
     userId: string;
+    userLogin: string;
   };
 
   @Prop({
@@ -33,11 +34,12 @@ export class Comment {
     content: string,
     postId: string,
     userId: string,
+    userLogin: string,
   ): CommentDocument {
     const comment = new this();
     comment.content = content;
     comment.postId = postId;
-    comment.commentatorInfo = { userId };
+    comment.commentatorInfo = { userId, userLogin };
     comment.likesInfo = { likesCount: 0, dislikesCount: 0, myStatus: 'None' };
     return comment as CommentDocument;
   }

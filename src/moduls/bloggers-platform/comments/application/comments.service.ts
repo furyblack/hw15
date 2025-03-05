@@ -15,12 +15,14 @@ export class CommentsService {
   async createComment(
     postId: string,
     userId: string,
+    userLogin: string,
     dto: CommentInputDto,
   ): Promise<CommentsViewDto> {
     const comment = this.commentModel.createInstance(
       dto.content,
       postId,
       userId,
+      userLogin,
     );
     await this.commentsRepository.save(comment);
     return CommentsViewDto.mapToView(comment);

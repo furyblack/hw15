@@ -5,6 +5,7 @@ import {
   CreatePostInputDto,
 } from '../dto/create-post.dto';
 import { HydratedDocument, Model } from 'mongoose';
+import { LikeStatusType } from '../likes/like-model';
 
 type newestLikes = {
   addedAt: string;
@@ -60,6 +61,46 @@ export class Post {
     this.title = dto.title;
     this.content = dto.content;
     this.shortDescription = dto.shortDescription;
+  }
+
+  updateLikeStatus(
+    userId: string,
+    likeStatus: LikeStatusType,
+    userLogin: string,
+  ) {
+    const existingLikeIndex = this.newestLikes.findIndex(
+      (like) => like.userId === userId,
+    );
+
+    // Удаляем текущий статус пользователя
+    if (existingLikeIndex !== -1) {
+      const existingLike = this.newestLikes[existingLikeIndex];
+      if (existingLike) {
+        if (this.likesCount > 0) {
+          this.likesCount -= 1;
+        }
+      }
+      this.newestLikes.splice(existingLikeIndex, 1);
+    }
+
+    // Добавляем новый статус
+    if (likeStatus === 'Like') {
+      this.newestLikes.push({
+        userId,
+        login: userLogin,
+        addedAt: new Date().toISOString(),
+      });
+      this.likesCount += 1;
+    } else if (likeStatus === 'Dislike') {
+      this.dislikesCount += 1;
+    }
+
+    // Если статус "None", просто удаляем лайк/дизлайк
+    if (likeStatus === 'None' && existingLikeIndex !== -1) {
+      if (this.dislikesCount > 0) {
+        this.dislikesCount -= 1;
+      }
+    }
   }
 }
 

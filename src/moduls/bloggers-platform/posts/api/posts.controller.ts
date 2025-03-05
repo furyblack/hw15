@@ -24,6 +24,9 @@ import { CurrentUser } from '../../../user-accounts/decarators/user-decorators';
 import { CommentsService } from '../../comments/application/comments.service';
 import { CommentsViewDto } from '../../comments/dto/comment-output-type';
 import { JwtAuthGuard } from '../../../user-accounts/guards/bearer/jwt-auth.guard';
+import { GetCommentsQueryParams } from '../../comments/dto/get-comments-query-params.input-dto';
+import { CommentsQueryRepository } from '../../comments/infrastructure/query/comments.query-repository';
+import { LikeToPostCreateModel } from '../likes/like-model';
 
 @Controller('posts')
 export class PostsController {
@@ -31,7 +34,8 @@ export class PostsController {
     private postQueryRepository: PostsQueryRepository,
     private postService: PostsService,
     private commentService: CommentsService,
-    private readonly commentsService: CommentsService,
+    private commentsService: CommentsService,
+    private commentQueryRepository: CommentsQueryRepository,
   ) {}
 
   @Post()
@@ -49,8 +53,9 @@ export class PostsController {
     @Param('id') postId: string,
     @Body() dto: CommentInputDto,
     @CurrentUser() userId: string,
+    @CurrentUser() userLogin: string,
   ): Promise<CommentsViewDto> {
-    return this.commentsService.createComment(postId, userId, dto);
+    return this.commentsService.createComment(postId, userId, userLogin, dto);
   }
 
   @Get()
@@ -64,6 +69,15 @@ export class PostsController {
   async getById(@Param('id') id: string): Promise<PostsViewDto> {
     return this.postQueryRepository.getByIdOrNotFoundFail(id);
   }
+
+  @Get(':id/comments')
+  async getCommentForPost(
+    @Param('id') postId: string,
+    @Query() query: GetCommentsQueryParams,
+  ): Promise<PaginatedViewDto<CommentsViewDto[]>> {
+    return this.commentQueryRepository.getCommentsForPost(postId, query);
+  }
+
   @Delete(':id')
   @UseGuards(BasicAuthGuard)
   @ApiBasicAuth('BasicAuth')
@@ -83,5 +97,21 @@ export class PostsController {
     console.log('123123123123');
     const postId = await this.postService.updatePost(id, body);
     return this.postQueryRepository.getByIdOrNotFoundFail(postId);
+  }
+  @Put(':id/like-status')
+  @UseGuards(JwtAuthGuard)
+  @HttpCode(HttpStatus.NO_CONTENT)
+  async createLikeToPost(
+    @Param('id') postId: string,
+    @Body() { likeStatus }: LikeToPostCreateModel,
+    @CurrentUser() userId: string,
+    @CurrentUser('login') userLogin: string,
+  ): Promise<void> {
+    await this.postService.updateLikeStatus(
+      postId,
+      userId,
+      likeStatus,
+      userLogin,
+    );
   }
 }

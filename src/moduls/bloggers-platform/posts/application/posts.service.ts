@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Post, PostModelType } from '../domain/post';
 import {
@@ -10,6 +10,7 @@ import { PostsRepository } from '../infrastructure/posts-repository';
 import { DeletionStatus } from '../../../user-accounts/domain/user.entity';
 import { Blog, BlogModelType } from '../../blogs/domain/blog.entity';
 import { BadRequestDomainException } from '../../../../core/exceptions/domain-exceptions';
+import { LikeStatusType } from '../likes/like-model';
 
 @Injectable()
 export class PostsService {
@@ -82,5 +83,20 @@ export class PostsService {
     post.update(dto);
     await this.postRepository.save(post);
     return post._id.toString();
+  }
+  async updateLikeStatus(
+    postId: string,
+    userId: string,
+    likeStatus: LikeStatusType,
+    userLogin: string,
+  ): Promise<void> {
+    const post = await this.postModel.findById(postId);
+
+    if (!post) {
+      throw new NotFoundException('Post not found');
+    }
+
+    post.updateLikeStatus(userId, likeStatus, userLogin);
+    await post.save();
   }
 }
