@@ -15,6 +15,7 @@ import { Comment, CommentSchema } from './comments/domain/comment.entity';
 import { CommentsService } from './comments/application/comments.service';
 import { CommentsRepository } from './comments/infrastructure/comments-repository';
 import { CommentsQueryRepository } from './comments/infrastructure/query/comments.query-repository';
+import { CommentsController } from './comments/api/comments.controller';
 
 @Module({
   imports: [
@@ -24,7 +25,7 @@ import { CommentsQueryRepository } from './comments/infrastructure/query/comment
       { name: Comment.name, schema: CommentSchema },
     ]),
   ],
-  controllers: [BlogsController, PostsController],
+  controllers: [BlogsController, PostsController, CommentsController],
   providers: [
     BlogsService,
     BlogsQueryRepository,

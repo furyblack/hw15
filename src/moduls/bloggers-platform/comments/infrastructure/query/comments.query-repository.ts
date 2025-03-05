@@ -7,6 +7,7 @@ import { CommentsViewDto } from '../../dto/comment-output-type';
 import { DeletionStatus } from '../../../../user-accounts/domain/user.entity';
 import { FilterQuery } from 'mongoose';
 import { Post, PostModelType } from '../../../posts/domain/post';
+import { NotFoundDomainException } from '../../../../../core/exceptions/domain-exceptions';
 
 @Injectable()
 export class CommentsQueryRepository {
@@ -56,5 +57,16 @@ export class CommentsQueryRepository {
       page: query.pageNumber,
       size: query.pageSize,
     });
+  }
+
+  async getCommentById(id: string): Promise<CommentsViewDto> {
+    const comment = await this.commentModel.findOne({
+      _id: id,
+      deletionStatus: DeletionStatus.NotDeleted,
+    });
+    if (!comment) {
+      throw NotFoundDomainException.create('Comment not found', 'comment');
+    }
+    return CommentsViewDto.mapToView(comment);
   }
 }
