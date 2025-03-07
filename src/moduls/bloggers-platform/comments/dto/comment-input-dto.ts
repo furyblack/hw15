@@ -7,3 +7,10 @@ export class CommentInputDto {
   @Trim()
   content: string;
 }
+
+export class UpdateCommentDto {
+  @IsString()
+  @Length(20, 300)
+  @Trim()
+  content: string;
+}

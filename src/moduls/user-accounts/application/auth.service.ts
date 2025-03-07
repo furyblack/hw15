@@ -18,6 +18,21 @@ export class AuthService {
     private emailService: EmailService,
   ) {}
 
+  // Генерация accessToken
+  private generateAccessToken(userId: string): string {
+    return this.jwtService.sign(
+      { id: userId },
+      { expiresIn: '15m' }, // accessToken действует 15 минут
+    );
+  }
+
+  // Генерация refreshToken
+  private generateRefreshToken(userId: string): string {
+    return this.jwtService.sign(
+      { id: userId },
+      { expiresIn: '7d' }, // refreshToken действует 7 дней
+    );
+  }
   async validateUser(
     login: string,
     password: string,
@@ -39,11 +54,15 @@ export class AuthService {
     return { id: user.id.toString() };
   }
 
-  async login(userId: string) {
-    const accessToken = this.jwtService.sign({ id: userId } as UserContextDto);
+  async login(
+    userId: string,
+  ): Promise<{ accessToken: string; refreshToken: string }> {
+    const accessToken = this.generateAccessToken(userId);
+    const refreshToken = this.generateRefreshToken(userId);
 
     return {
       accessToken,
+      refreshToken,
     };
   }
   async register(dto: CreateUserDto) {

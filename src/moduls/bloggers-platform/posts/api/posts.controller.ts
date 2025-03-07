@@ -66,8 +66,11 @@ export class PostsController {
   }
 
   @Get(':id')
-  async getById(@Param('id') id: string): Promise<PostsViewDto> {
-    return this.postQueryRepository.getByIdOrNotFoundFail(id);
+  async getById(
+    @Param('id') id: string,
+    @CurrentUser() userId?: string,
+  ): Promise<PostsViewDto> {
+    return this.postQueryRepository.getByIdOrNotFoundFail(id, userId);
   }
 
   @Get(':id/comments')
