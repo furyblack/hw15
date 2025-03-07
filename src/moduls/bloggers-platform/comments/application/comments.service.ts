@@ -1,9 +1,13 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { CommentsRepository } from '../infrastructure/comments-repository';
 import { Comment, CommentModelType } from '../domain/comment.entity';
 import { CommentInputDto } from '../dto/comment-input-dto';
 import { InjectModel } from '@nestjs/mongoose';
 import { CommentsViewDto } from '../dto/comment-output-type';
+import {
+  ForbiddenDomainException,
+  NotFoundDomainException,
+} from '../../../../core/exceptions/domain-exceptions';
 
 @Injectable()
 export class CommentsService {
@@ -38,9 +42,13 @@ export class CommentsService {
     });
 
     if (!comment) {
-      throw new NotFoundException(
+      throw NotFoundDomainException.create(
         'Comment not found or you do not have permission to edit it',
+        'comment',
       );
+    }
+    if (!userId) {
+      throw ForbiddenDomainException.create('ne tvoe ne lez', 'userId');
     }
 
     comment.content = content;
@@ -55,9 +63,13 @@ export class CommentsService {
     });
 
     if (!comment) {
-      throw new NotFoundException(
-        'Comment not found or you do not have permission to delete it',
+      throw NotFoundDomainException.create(
+        'Comment not found or you do not have permission to edit it',
+        'comment',
       );
+    }
+    if (!userId) {
+      throw ForbiddenDomainException.create('ne tvoe ne lez', 'userId');
     }
 
     await comment.deleteOne();

@@ -7,6 +7,8 @@ import {
   Put,
   UseGuards,
   Request,
+  HttpCode,
+  HttpStatus,
 } from '@nestjs/common';
 import { CommentsViewDto } from '../dto/comment-output-type';
 import { CommentsQueryRepository } from '../infrastructure/query/comments.query-repository';
@@ -26,6 +28,7 @@ export class CommentsController {
   }
   @Put(':id')
   @UseGuards(JwtAuthGuard)
+  @HttpCode(HttpStatus.NO_CONTENT)
   async updateComment(
     @Param('id') commentId: string,
     @Body() updateCommentDto: UpdateCommentDto,
@@ -42,6 +45,7 @@ export class CommentsController {
 
   @Delete(':id')
   @UseGuards(JwtAuthGuard)
+  @HttpCode(HttpStatus.NO_CONTENT)
   async deleteComment(
     @Param('id') commentId: string,
     @Request() req, // Получаем пользователя из запроса

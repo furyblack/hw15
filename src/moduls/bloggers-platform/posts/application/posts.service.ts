@@ -9,7 +9,10 @@ import {
 import { PostsRepository } from '../infrastructure/posts-repository';
 import { DeletionStatus } from '../../../user-accounts/domain/user.entity';
 import { Blog, BlogModelType } from '../../blogs/domain/blog.entity';
-import { BadRequestDomainException } from '../../../../core/exceptions/domain-exceptions';
+import {
+  BadRequestDomainException,
+  NotFoundDomainException,
+} from '../../../../core/exceptions/domain-exceptions';
 import {
   LikeStatusEnum,
   LikeStatusType,
@@ -60,7 +63,7 @@ export class PostsService {
     });
 
     if (!blogExists) {
-      throw BadRequestDomainException.create('blog not found', 'blogId');
+      throw NotFoundDomainException.create('blog not found', 'blogId');
     }
     const blog = await this.blogModel.findOne({
       _id: blogId,
