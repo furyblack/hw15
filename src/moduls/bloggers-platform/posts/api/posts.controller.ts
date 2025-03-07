@@ -85,6 +85,7 @@ export class PostsController {
   async deletePost(@Param('id') id: string): Promise<void> {
     await this.postService.deletePost(id);
   }
+
   @Put(':id')
   @UseGuards(BasicAuthGuard)
   @ApiBasicAuth('BasicAuth')
@@ -98,6 +99,7 @@ export class PostsController {
     const postId = await this.postService.updatePost(id, body);
     return this.postQueryRepository.getByIdOrNotFoundFail(postId);
   }
+
   @Put(':id/like-status')
   @UseGuards(JwtAuthGuard)
   @HttpCode(HttpStatus.NO_CONTENT)

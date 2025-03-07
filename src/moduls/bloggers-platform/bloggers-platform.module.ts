@@ -16,6 +16,7 @@ import { CommentsService } from './comments/application/comments.service';
 import { CommentsRepository } from './comments/infrastructure/comments-repository';
 import { CommentsQueryRepository } from './comments/infrastructure/query/comments.query-repository';
 import { CommentsController } from './comments/api/comments.controller';
+import { PostLike, PostLikeSchema } from './posts/likes/like-model';
 
 @Module({
   imports: [
@@ -23,6 +24,7 @@ import { CommentsController } from './comments/api/comments.controller';
       { name: Blog.name, schema: BlogSchema },
       { name: Post.name, schema: PostSchema },
       { name: Comment.name, schema: CommentSchema },
+      { name: PostLike.name, schema: PostLikeSchema },
     ]),
   ],
   controllers: [BlogsController, PostsController, CommentsController],

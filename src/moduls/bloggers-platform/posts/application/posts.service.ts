@@ -10,13 +10,20 @@ import { PostsRepository } from '../infrastructure/posts-repository';
 import { DeletionStatus } from '../../../user-accounts/domain/user.entity';
 import { Blog, BlogModelType } from '../../blogs/domain/blog.entity';
 import { BadRequestDomainException } from '../../../../core/exceptions/domain-exceptions';
-import { LikeStatusType } from '../likes/like-model';
+import {
+  LikeStatusEnum,
+  LikeStatusType,
+  PostLike,
+  PostLikeDocument,
+} from '../likes/like-model';
+import { Model } from 'mongoose';
 
 @Injectable()
 export class PostsService {
   constructor(
     @InjectModel(Post.name)
     private postModel: PostModelType,
+    @InjectModel(PostLike.name) private postLikeModel: Model<PostLikeDocument>,
     private postRepository: PostsRepository,
     @InjectModel(Blog.name)
     private blogModel: BlogModelType,
@@ -96,49 +103,58 @@ export class PostsService {
       throw new NotFoundException('post not found');
     }
 
-    // логика обновления лайков
-    const existingLikeIndex = post.newestLikes.findIndex(
-      (like) => like.userId === userId,
-    );
-    console.log('aaa', post.newestLikes);
-    // удаляем текущий статус пользователя
-    if (existingLikeIndex !== -1) {
-      const existingLike = post.newestLikes[existingLikeIndex];
+    const existingLike = await this.postLikeModel.findOne({ postId, userId });
+
+    if (likeStatus === 'None') {
       if (existingLike) {
-        if (post.likesCount > 0) {
-          post.likesCount -= 1;
+        await existingLike.deleteOne();
+      }
+    } else {
+      if (existingLike) {
+        if (existingLike.status !== (likeStatus as LikeStatusEnum)) {
+          existingLike.status = likeStatus as LikeStatusEnum;
+          await existingLike.save();
         }
+      } else {
+        const newLike = new this.postLikeModel({
+          postId,
+          userId,
+          status: likeStatus as LikeStatusEnum,
+          login: userLogin,
+        });
+        await newLike.save();
       }
-      post.newestLikes.splice(existingLikeIndex, 1);
-    }
-    console.log('bbb', post.newestLikes);
-    // добавляем новый статус
-    if (likeStatus === 'Like') {
-      post.newestLikes.push({
-        userId,
-        login: userLogin,
-        addedAt: new Date().toISOString(),
-      });
-      console.log('ccc', post.newestLikes);
-      //ограничиваем массив тремя элементами
-      if (post.newestLikes.length > 3) {
-        post.newestLikes.shift(); // Удаляем самый старый лайк
-      }
-
-      post.likesCount += 1;
-    } else if (likeStatus === 'Dislike') {
-      post.dislikesCount += 1;
     }
 
-    //если статус "None", просто удаляем лайк/дизлайк
-    if (likeStatus === 'None' && existingLikeIndex !== -1) {
-      if (post.dislikesCount > 0) {
-        post.dislikesCount -= 1;
-      }
-    }
-    console.log('ddd', post.newestLikes);
-    //сохраняем изменения в базе данных
-    await post.save();
-    console.log('ggg', post.newestLikes);
+    await this.updatePostLikeCounts(postId);
+  }
+
+  private async updatePostLikeCounts(postId: string): Promise<void> {
+    const likesCount = await this.postLikeModel.countDocuments({
+      postId,
+      status: 'Like',
+    });
+    const dislikesCount = await this.postLikeModel.countDocuments({
+      postId,
+      status: 'Dislike',
+    });
+
+    const newestLikes = await this.postLikeModel
+      .find({ postId, status: 'Like' })
+      .sort({ createdAt: -1 })
+      .limit(3)
+      .exec();
+
+    const lastThreeLikes = newestLikes.map((like) => ({
+      addedAt: like.createdAt,
+      userId: like.userId,
+      login: like.login,
+    }));
+
+    await this.postModel.findByIdAndUpdate(postId, {
+      likesCount,
+      dislikesCount,
+      newestLikes: lastThreeLikes,
+    });
   }
 }

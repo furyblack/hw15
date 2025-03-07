@@ -49,7 +49,6 @@ export class Post {
     post.deletionStatus = DeletionStatus.NotDeleted;
     return post as PostDocument;
   }
-
   makeDeleted() {
     if (this.deletionStatus !== DeletionStatus.NotDeleted) {
       throw new Error('Entity already deleted');
