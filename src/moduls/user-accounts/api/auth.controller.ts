@@ -54,7 +54,7 @@ export class AuthController {
     // Устанавливаем refreshToken в cookie
     response.cookie('refreshToken', refreshToken, {
       httpOnly: true, // Защита от XSS
-      secure: process.env.NODE_ENV === 'production', // В production используем HTTPS
+      secure: true, // В production используем HTTPS
       maxAge: 7 * 24 * 60 * 60 * 1000, // 7 дней
     });
 
