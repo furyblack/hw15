@@ -59,7 +59,6 @@ export class AuthService {
   ): Promise<{ accessToken: string; refreshToken: string }> {
     const accessToken = this.generateAccessToken(userId);
     const refreshToken = this.generateRefreshToken(userId);
-
     return {
       accessToken,
       refreshToken,
