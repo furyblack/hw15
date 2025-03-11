@@ -27,6 +27,7 @@ import { JwtAuthGuard } from '../../../user-accounts/guards/bearer/jwt-auth.guar
 import { GetCommentsQueryParams } from '../../comments/dto/get-comments-query-params.input-dto';
 import { CommentsQueryRepository } from '../../comments/infrastructure/query/comments.query-repository';
 import { LikeToPostCreateModel } from '../likes/like-model';
+import { JwtOptionalAuthGuard } from '../../../user-accounts/guards/bearer/jwt-optional-auth.guard';
 
 @Controller('posts')
 export class PostsController {
@@ -66,10 +67,12 @@ export class PostsController {
   }
 
   @Get(':id')
+  @UseGuards(JwtOptionalAuthGuard)
   async getById(
     @Param('id') id: string,
     @CurrentUser() userId?: string,
   ): Promise<PostsViewDto> {
+    console.log('log userid from get post by id', id, userId);
     return this.postQueryRepository.getByIdOrNotFoundFail(id, userId);
   }
 

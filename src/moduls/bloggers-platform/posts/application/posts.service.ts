@@ -153,7 +153,6 @@ export class PostsService {
       userId: like.userId,
       login: like.login,
     }));
-
     await this.postModel.findByIdAndUpdate(postId, {
       likesCount,
       dislikesCount,
