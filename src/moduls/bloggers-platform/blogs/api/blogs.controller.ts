@@ -26,6 +26,7 @@ import { PostsQueryRepository } from '../../posts/infrastructure/query/posts.que
 import { GetPostsQueryParams } from '../../posts/api/input-dto/get-posts-query-params.input-dto';
 import { BasicAuthGuard } from '../../../user-accounts/guards/basic/basic-auth.guard';
 import { ApiBasicAuth } from '@nestjs/swagger';
+import { JwtOptionalAuthGuard } from '../../../user-accounts/guards/bearer/jwt-optional-auth.guard';
 
 @Controller('blogs')
 export class BlogsController {
@@ -47,6 +48,7 @@ export class BlogsController {
     return this.blogQueryRepository.getByIdOrNotFoundFail(id);
   }
   @Get(':id/posts')
+  @UseGuards(JwtOptionalAuthGuard)
   async getPostsForBlog(
     @Param('id') blogId: string,
     @Query() query: GetPostsQueryParams,

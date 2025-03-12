@@ -54,16 +54,18 @@ export class PostsController {
     @Param('id') postId: string,
     @Body() dto: CommentInputDto,
     @CurrentUser() userId: string,
-    @CurrentUser() userLogin: string,
+    @CurrentUser('login') userLogin: string,
   ): Promise<CommentsViewDto> {
     return this.commentsService.createComment(postId, userId, userLogin, dto);
   }
 
   @Get()
+  @UseGuards(JwtOptionalAuthGuard)
   async getAll(
     @Query() query: GetPostsQueryParams,
+    @CurrentUser() userId?: string,
   ): Promise<PaginatedViewDto<PostsViewDto[]>> {
-    return this.postQueryRepository.getAll(query);
+    return this.postQueryRepository.getAll(query, userId);
   }
 
   @Get(':id')
