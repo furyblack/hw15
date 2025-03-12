@@ -18,6 +18,7 @@ import { UpdateCommentDto } from '../dto/comment-input-dto';
 import { CommentsService } from '../application/comments.service';
 import { LikeToPostCreateModel } from '../../posts/likes/like-model';
 import { CurrentUser } from '../../../user-accounts/decarators/user-decorators';
+import { JwtOptionalAuthGuard } from '../../../user-accounts/guards/bearer/jwt-optional-auth.guard';
 
 @Controller('comments')
 export class CommentsController {
@@ -27,6 +28,7 @@ export class CommentsController {
   ) {}
 
   @Get(':id')
+  @UseGuards(JwtOptionalAuthGuard)
   async getComment(@Param('id') id: string): Promise<CommentsViewDto> {
     return this.commentQueryRepository.getCommentById(id);
   }
@@ -65,6 +67,9 @@ export class CommentsController {
 
       await this.commentsService.updateLikeComment(id, userId, likeStatus);
     } catch (error) {
+      if (error instanceof NotFoundException) {
+        throw error; // Пробрасываем NotFoundException дальше
+      }
       console.error('Error updating like status:', error);
       throw new InternalServerErrorException({ error: 'Something went wrong' });
     }
