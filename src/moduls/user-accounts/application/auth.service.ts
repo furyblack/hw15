@@ -19,17 +19,17 @@ export class AuthService {
   ) {}
 
   // Генерация accessToken
-  private generateAccessToken(userId: string): string {
+  private generateAccessToken(userId: string, login: string): string {
     return this.jwtService.sign(
-      { id: userId },
+      { id: userId, login },
       { expiresIn: '15m' }, // accessToken действует 15 минут
     );
   }
 
   // Генерация refreshToken
-  private generateRefreshToken(userId: string): string {
+  private generateRefreshToken(userId: string, login: string): string {
     return this.jwtService.sign(
-      { id: userId },
+      { id: userId, login },
       { expiresIn: '7d' }, // refreshToken действует 7 дней
     );
   }
@@ -57,8 +57,12 @@ export class AuthService {
   async login(
     userId: string,
   ): Promise<{ accessToken: string; refreshToken: string }> {
-    const accessToken = this.generateAccessToken(userId);
-    const refreshToken = this.generateRefreshToken(userId);
+    const user = await this.usersRepository.findById(userId);
+    if (!user) {
+      throw new BadRequestException('User not found');
+    }
+    const accessToken = this.generateAccessToken(userId, user.login);
+    const refreshToken = this.generateRefreshToken(userId, user.login);
     return {
       accessToken,
       refreshToken,

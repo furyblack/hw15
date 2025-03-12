@@ -97,8 +97,8 @@ export class PostsService {
   async updateLikeStatus(
     postId: string,
     userId: string,
-    likeStatus: LikeStatusType,
     userLogin: string,
+    likeStatus: LikeStatusType,
   ): Promise<void> {
     const post = await this.postModel.findById(postId);
 
@@ -106,7 +106,10 @@ export class PostsService {
       throw new NotFoundException('post not found');
     }
 
-    const existingLike = await this.postLikeModel.findOne({ postId, userId });
+    const existingLike = await this.postLikeModel.findOne({
+      postId,
+      userId,
+    });
 
     if (likeStatus === 'None') {
       if (existingLike) {
@@ -122,9 +125,10 @@ export class PostsService {
         const newLike = new this.postLikeModel({
           postId,
           userId,
-          status: likeStatus as LikeStatusEnum,
           login: userLogin,
+          status: likeStatus as LikeStatusEnum,
         });
+        console.log('Сохранение лайка:', newLike);
         await newLike.save();
       }
     }
@@ -146,13 +150,21 @@ export class PostsService {
       .find({ postId, status: 'Like' })
       .sort({ createdAt: -1 })
       .limit(3)
+      .select(['userId', 'createdAt', 'login'])
       .exec();
+    console.log('newestLikes:', newestLikes);
 
     const lastThreeLikes = newestLikes.map((like) => ({
       addedAt: like.createdAt,
       userId: like.userId,
       login: like.login,
     }));
+    console.log('Обновляем пост с лайками:', {
+      likesCount,
+      dislikesCount,
+      newestLikes: lastThreeLikes,
+    });
+
     await this.postModel.findByIdAndUpdate(postId, {
       likesCount,
       dislikesCount,

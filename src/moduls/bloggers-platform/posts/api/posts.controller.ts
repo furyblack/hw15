@@ -118,8 +118,8 @@ export class PostsController {
     await this.postService.updateLikeStatus(
       postId,
       userId,
-      likeStatus,
       userLogin,
+      likeStatus,
     );
   }
 }
