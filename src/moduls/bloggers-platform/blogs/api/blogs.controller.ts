@@ -27,6 +27,7 @@ import { GetPostsQueryParams } from '../../posts/api/input-dto/get-posts-query-p
 import { BasicAuthGuard } from '../../../user-accounts/guards/basic/basic-auth.guard';
 import { ApiBasicAuth } from '@nestjs/swagger';
 import { JwtOptionalAuthGuard } from '../../../user-accounts/guards/bearer/jwt-optional-auth.guard';
+import { CurrentUser } from '../../../user-accounts/decarators/user-decorators';
 
 @Controller('blogs')
 export class BlogsController {
@@ -51,9 +52,10 @@ export class BlogsController {
   @UseGuards(JwtOptionalAuthGuard)
   async getPostsForBlog(
     @Param('id') blogId: string,
+    @CurrentUser() userId: string,
     @Query() query: GetPostsQueryParams,
   ): Promise<PaginatedViewDto<PostsViewDto[]>> {
-    return this.postQueryRepository.getAllPostsForBlog(blogId, query);
+    return this.postQueryRepository.getAllPostsForBlog(blogId, query, userId);
   }
 
   @Post()
