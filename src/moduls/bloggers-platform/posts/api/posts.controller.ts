@@ -79,11 +79,17 @@ export class PostsController {
   }
 
   @Get(':id/comments')
+  @UseGuards(JwtOptionalAuthGuard)
   async getCommentForPost(
     @Param('id') postId: string,
     @Query() query: GetCommentsQueryParams,
+    @CurrentUser() userId?: string,
   ): Promise<PaginatedViewDto<CommentsViewDto[]>> {
-    return this.commentQueryRepository.getCommentsForPost(postId, query);
+    return this.commentQueryRepository.getCommentsForPost(
+      postId,
+      query,
+      userId,
+    );
   }
 
   @Delete(':id')

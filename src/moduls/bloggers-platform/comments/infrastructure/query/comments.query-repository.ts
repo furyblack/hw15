@@ -5,9 +5,14 @@ import { GetCommentsQueryParams } from '../../dto/get-comments-query-params.inpu
 import { PaginatedViewDto } from '../../../../../core/dto/base.paginated.view-dto';
 import { CommentsViewDto } from '../../dto/comment-output-type';
 import { DeletionStatus } from '../../../../user-accounts/domain/user.entity';
-import { FilterQuery } from 'mongoose';
+import { FilterQuery, Model } from 'mongoose';
 import { Post, PostModelType } from '../../../posts/domain/post';
 import { NotFoundDomainException } from '../../../../../core/exceptions/domain-exceptions';
+import { LikeStatusType } from '../../../posts/likes/like-model';
+import {
+  CommentLikeDocument,
+  CommentLikeModel,
+} from '../../likes/likes-model-for-comments';
 
 @Injectable()
 export class CommentsQueryRepository {
@@ -16,10 +21,13 @@ export class CommentsQueryRepository {
     private postModel: PostModelType,
     @InjectModel(Comment.name)
     private commentModel: CommentModelType,
+    @InjectModel(CommentLikeModel.name)
+    private commentLikeModel: Model<CommentLikeDocument>,
   ) {}
   async getCommentsForPost(
     postId: string,
     query: GetCommentsQueryParams,
+    userId?: string,
   ): Promise<PaginatedViewDto<CommentsViewDto[]>> {
     const postExists = await this.postModel.exists({
       _id: postId,
@@ -49,7 +57,21 @@ export class CommentsQueryRepository {
 
     const totalCount = await this.commentModel.countDocuments(filter);
 
-    const items = comments.map((c) => CommentsViewDto.mapToView(c));
+    const items = await Promise.all(
+      comments.map(async (c) => {
+        let myStatus: LikeStatusType = 'None';
+        if (userId) {
+          const userLike = await this.commentLikeModel.findOne({
+            commentId: c._id.toString(),
+            userId,
+          });
+          if (userLike) {
+            myStatus = userLike.status;
+          }
+        }
+        return CommentsViewDto.mapToView(c, myStatus);
+      }),
+    );
 
     return PaginatedViewDto.mapToView({
       items,
@@ -59,7 +81,7 @@ export class CommentsQueryRepository {
     });
   }
 
-  async getCommentById(id: string): Promise<CommentsViewDto> {
+  async getCommentById(id: string, userId?: string): Promise<CommentsViewDto> {
     const comment = await this.commentModel.findOne({
       _id: id,
       deletionStatus: DeletionStatus.NotDeleted,
@@ -67,6 +89,16 @@ export class CommentsQueryRepository {
     if (!comment) {
       throw NotFoundDomainException.create('Comment not found', 'comment');
     }
-    return CommentsViewDto.mapToView(comment);
+    let myStatus: LikeStatusType = 'None';
+    if (userId) {
+      const userLike = await this.commentLikeModel.findOne({
+        commentId: id,
+        userId,
+      });
+      if (userLike) {
+        myStatus = userLike.status;
+      }
+    }
+    return CommentsViewDto.mapToView(comment, myStatus);
   }
 }

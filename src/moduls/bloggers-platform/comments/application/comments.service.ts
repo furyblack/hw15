@@ -36,7 +36,8 @@ export class CommentsService {
       userLogin,
     );
     await this.commentsRepository.save(comment);
-    return CommentsViewDto.mapToView(comment);
+    const myStatus: LikeStatusType = 'None';
+    return CommentsViewDto.mapToView(comment, myStatus);
   }
 
   async updateComment(

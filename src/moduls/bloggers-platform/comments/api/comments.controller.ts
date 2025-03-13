@@ -29,8 +29,11 @@ export class CommentsController {
 
   @Get(':id')
   @UseGuards(JwtOptionalAuthGuard)
-  async getComment(@Param('id') id: string): Promise<CommentsViewDto> {
-    return this.commentQueryRepository.getCommentById(id);
+  async getComment(
+    @Param('id') id: string,
+    @CurrentUser() userId?: string,
+  ): Promise<CommentsViewDto> {
+    return this.commentQueryRepository.getCommentById(id, userId);
   }
 
   @Put(':id')

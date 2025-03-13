@@ -10,6 +10,7 @@ export class CommentLikeModel {
     ref: 'Comment',
     required: true,
   })
+  @Prop()
   commentId: Comment;
 
   @Prop({ required: true })
