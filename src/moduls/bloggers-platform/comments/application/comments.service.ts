@@ -1,4 +1,9 @@
-import { Injectable, Logger, NotFoundException } from '@nestjs/common';
+import {
+  ForbiddenException,
+  Injectable,
+  Logger,
+  NotFoundException,
+} from '@nestjs/common';
 import { CommentsRepository } from '../infrastructure/comments-repository';
 import { Comment, CommentModelType } from '../domain/comment.entity';
 import { CommentInputDto } from '../dto/comment-input-dto';
@@ -58,15 +63,21 @@ export class CommentsService {
     userId: string,
   ): Promise<void> {
     try {
-      // Ищем комментарий, принадлежащий текущему пользователю
+      // Ищем комментарий по ID
       const comment = await this.commentModel.findOne({
         _id: commentId,
-        'commentatorInfo.userId': userId,
       });
 
       // Если комментарий не найден
       if (!comment) {
         throw NotFoundDomainException.create('Comment not found', 'comment');
+      }
+
+      // Если комментарий найден, но не принадлежит пользователю
+      if (comment.commentatorInfo.userId !== userId) {
+        throw new ForbiddenException(
+          'You are not allowed to update this comment',
+        );
       }
 
       // Обновляем содержимое комментария
@@ -79,22 +90,26 @@ export class CommentsService {
     }
   }
 
-  async deleteComment(commentId: string, userId: string): Promise<boolean> {
+  async deleteComment(commentId: string, userId: string): Promise<void> {
     try {
+      // Ищем комментарий по ID
       const comment = await this.commentModel.findOne({
         _id: commentId,
-        'commentatorInfo.userId': userId,
       });
 
+      // Если комментарий не найден
       if (!comment) {
-        throw NotFoundDomainException.create(
-          'Comment not found or you do not have permission to delete it',
-          'comment',
+        throw NotFoundDomainException.create('Comment not found', 'comment');
+      }
+
+      // Если комментарий найден, но не принадлежит пользователю
+      if (comment.commentatorInfo.userId !== userId) {
+        throw new ForbiddenException(
+          'You are not allowed to delete this comment',
         );
       }
 
       await comment.deleteOne();
-      return true;
     } catch (error) {
       this.logger.error(`Error deleting comment: ${error.message}`);
       throw error;
