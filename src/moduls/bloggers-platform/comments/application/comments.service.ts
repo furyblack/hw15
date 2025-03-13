@@ -1,4 +1,4 @@
-import { Injectable, Logger } from '@nestjs/common';
+import { Injectable, Logger, NotFoundException } from '@nestjs/common';
 import { CommentsRepository } from '../infrastructure/comments-repository';
 import { Comment, CommentModelType } from '../domain/comment.entity';
 import { CommentInputDto } from '../dto/comment-input-dto';
@@ -11,6 +11,8 @@ import {
   CommentLikeModel,
 } from '../likes/likes-model-for-comments';
 import { Model } from 'mongoose';
+import { Post, PostModelType } from '../../posts/domain/post';
+import { DeletionStatus } from '../../../user-accounts/domain/user.entity';
 
 @Injectable()
 export class CommentsService {
@@ -21,6 +23,8 @@ export class CommentsService {
     @InjectModel(Comment.name) private commentModel: CommentModelType,
     @InjectModel(CommentLikeModel.name)
     private commentLikeDocumentModel: Model<CommentLikeDocument>,
+    @InjectModel(Post.name)
+    private postModel: PostModelType,
   ) {}
 
   async createComment(
@@ -29,6 +33,14 @@ export class CommentsService {
     userLogin: string,
     dto: CommentInputDto,
   ): Promise<CommentsViewDto> {
+    // Проверяем, существует ли пост
+    const postExists = await this.postModel.exists({
+      _id: postId,
+      deletionStatus: DeletionStatus.NotDeleted,
+    });
+    if (!postExists) {
+      throw new NotFoundException('Post not found');
+    }
     const comment = this.commentModel.createInstance(
       dto.content,
       postId,
@@ -44,24 +56,24 @@ export class CommentsService {
     commentId: string,
     content: string,
     userId: string,
-  ): Promise<boolean> {
+  ): Promise<void> {
     try {
+      // Ищем комментарий, принадлежащий текущему пользователю
       const comment = await this.commentModel.findOne({
         _id: commentId,
         'commentatorInfo.userId': userId,
       });
 
+      // Если комментарий не найден
       if (!comment) {
-        throw NotFoundDomainException.create(
-          'Comment not found or you do not have permission to edit it',
-          'comment',
-        );
+        throw NotFoundDomainException.create('Comment not found', 'comment');
       }
 
+      // Обновляем содержимое комментария
       comment.content = content;
       await comment.save();
-      return true;
     } catch (error) {
+      // Логируем ошибку, если это необходимо
       this.logger.error(`Error updating comment: ${error.message}`);
       throw error;
     }
