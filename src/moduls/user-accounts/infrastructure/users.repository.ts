@@ -1,20 +1,15 @@
 import { InjectModel } from '@nestjs/mongoose';
-import {
-  DeletionStatus,
-  User,
-  UserDocument,
-  UserModelType,
-} from '../domain/user.entity';
+import { DeletionStatus, User, UserDocument } from '../domain/user.entity';
 import { Injectable, NotFoundException } from '@nestjs/common';
-import { Types } from 'mongoose';
+import { Model, Types } from 'mongoose';
 
 @Injectable()
 export class UsersRepository {
   //инжектирование модели через DI
-  constructor(@InjectModel(User.name) private UserModel: UserModelType) {}
+  constructor(@InjectModel(User.name) private userModel: Model<UserDocument>) {}
 
   async findById(id: string): Promise<UserDocument | null> {
-    return this.UserModel.findOne({
+    return this.userModel.findOne({
       _id: id,
       deletionStatus: { $ne: DeletionStatus.PermanentDeleted },
     });
@@ -22,6 +17,15 @@ export class UsersRepository {
 
   async save(user: UserDocument) {
     await user.save();
+  }
+
+  async createUser(userData: {
+    email: string;
+    login: string;
+    passwordHash: string;
+  }): Promise<UserDocument> {
+    const user = new this.userModel(userData);
+    return user.save();
   }
 
   async findOrNotFoundFail(id: Types.ObjectId): Promise<UserDocument> {
@@ -35,15 +39,15 @@ export class UsersRepository {
     return user;
   }
   findByLogin(login: string): Promise<UserDocument | null> {
-    return this.UserModel.findOne({ login });
+    return this.userModel.findOne({ login });
   }
   async findByEmail(email: string) {
-    return this.UserModel.findOne({ email }).exec();
+    return this.userModel.findOne({ email }).exec();
   }
   async loginIsExist(login: string): Promise<boolean> {
-    return !!(await this.UserModel.countDocuments({ login: login }));
+    return !!(await this.userModel.countDocuments({ login: login }));
   }
   async findByConfirmationCode(code: string): Promise<UserDocument | null> {
-    return this.UserModel.findOne({ confirmationCode: code });
+    return this.userModel.findOne({ confirmationCode: code });
   }
 }

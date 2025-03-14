@@ -3,7 +3,9 @@ import { Types } from 'mongoose';
 import { CreateUserUseCase } from './create-user-use-case';
 import { UsersRepository } from '../infrastructure/users.repository';
 import { EmailService } from '../../notifications/email.service';
+import { Injectable } from '@nestjs/common';
 
+@Injectable()
 export class RegisterUserUseCase {
   constructor(
     private createUserUseCase: CreateUserUseCase,

@@ -1,6 +1,8 @@
 import { Types } from 'mongoose';
 import { UsersRepository } from '../infrastructure/users.repository';
+import { Injectable } from '@nestjs/common';
 
+@Injectable()
 export class DeleteUserUseCase {
   constructor(private usersRepository: UsersRepository) {}
 

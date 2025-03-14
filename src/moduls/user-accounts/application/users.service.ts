@@ -1,6 +1,4 @@
 import { Injectable } from '@nestjs/common';
-import { InjectModel } from '@nestjs/mongoose';
-import { User } from '../domain/user.entity';
 import { CreateUserDto } from '../dto/create-user.dto';
 import { UsersRepository } from '../infrastructure/users.repository';
 import { Types } from 'mongoose';
@@ -11,8 +9,6 @@ import { DeleteUserUseCase } from '../use-cases/delete-user-use-case';
 @Injectable()
 export class UsersService {
   constructor(
-    //инжектирование модели в сервис через DI
-    @InjectModel(User.name)
     private usersRepository: UsersRepository,
     private createUserUseCase: CreateUserUseCase,
     private registerUserUseCase: RegisterUserUseCase,
