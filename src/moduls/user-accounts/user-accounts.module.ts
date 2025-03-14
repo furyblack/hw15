@@ -15,6 +15,9 @@ import { NotificationsModule } from '../notifications/notifications.module';
 import { JwtModule } from '@nestjs/jwt';
 import { AuthController } from './api/auth.controller';
 import { SecurityDevicesController } from './api/security-devices.controller';
+import { CreateUserUseCase } from './use-cases/create-user-use-case';
+import { RegisterUserUseCase } from './use-cases/register-user-use-case';
+import { DeleteUserUseCase } from './use-cases/delete-user-use-case';
 
 @Module({
   imports: [
@@ -43,6 +46,9 @@ import { SecurityDevicesController } from './api/security-devices.controller';
     LocalStrategy,
     CryptoService,
     JwtStrategy,
+    CreateUserUseCase,
+    RegisterUserUseCase,
+    DeleteUserUseCase,
   ],
 
   exports: [
