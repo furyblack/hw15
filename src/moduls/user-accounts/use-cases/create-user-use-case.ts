@@ -33,7 +33,6 @@ export class CreateUserUseCase {
         'email',
       );
     }
-
     // Хешируем пароль
     const passwordHash = await this.cryptoService.createPasswordHash(
       dto.password,
