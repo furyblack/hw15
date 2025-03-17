@@ -23,7 +23,7 @@ export class CreateUserUseCase {
       );
     }
 
-    // Проверяем, существует ли пользователь с таким email
+    //Проверяем, существует ли пользователь с таким email
     const userWithTheSameEmail = await this.usersRepository.findByEmail(
       dto.email,
     );
