@@ -41,7 +41,6 @@ export class AuthService {
     if (!user) {
       return null;
     }
-
     const isPasswordValid = await this.cryptoService.comparePasswords({
       password,
       hash: user.passwordHash,
@@ -131,7 +130,6 @@ export class AuthService {
     }
 
     const newconfirmCode = 'newuuid';
-
     user.setConfirmationCode(newconfirmCode);
     await this.usersRepository.save(user);
     await this.emailService
