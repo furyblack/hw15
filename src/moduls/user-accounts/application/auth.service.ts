@@ -128,7 +128,6 @@ export class AuthService {
         { message: 'User already confirmed', key: 'email' },
       ]);
     }
-
     const newconfirmCode = 'newuuid';
     user.setConfirmationCode(newconfirmCode);
     await this.usersRepository.save(user);
