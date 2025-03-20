@@ -12,7 +12,6 @@ export class DeleteUserUseCase {
     );
 
     user.makeDeleted();
-
     await this.usersRepository.save(user);
   }
 }
