@@ -27,7 +27,7 @@ describe('auth', () => {
   beforeEach(async () => {
     await deleteAllData(app);
   });
-  // it('should registir new user', async () => {
+  // it('should register new user', async () => {
   //   const res = await request(app).post('/api/v1/users/register').send({
   //     name: 'Test User',
   //     email: 'test@example.com',
