@@ -52,7 +52,7 @@ describe('blogs', () => {
       isMembership: expect.any(Boolean),
     });
   });
-  it('should get blogs with paging ', async () => {
+  it('should get blogs with pagingination ', async () => {
     const blogs = await blogTestManager.createSeveralBlogs(12);
     const { body: responseBody } = (await request(app.getHttpServer())
       .get(`/api/blogs?pageNumber=2&sortDirection=asc`)
