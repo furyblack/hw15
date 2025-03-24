@@ -121,7 +121,7 @@ describe('blogs', () => {
     // 3. Обновляем блог
     await blogTestManager.updateBlog(createdBlog.id, updateBody);
 
-    // 4. Получаем обновленный блог и проверяем, что данные изменились
+    // 4 Получаем обновленный блог и проверяем, что данные изменились
     const { body: responseBody } = await request(app.getHttpServer())
       .get(`/api/blogs/${createdBlog.id}`)
       .expect(HttpStatus.OK);
