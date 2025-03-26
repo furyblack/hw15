@@ -10,18 +10,23 @@ import {
 import request from 'supertest';
 import { PaginatedViewDto } from '../src/core/dto/base.paginated.view-dto';
 import { BlogsViewDto } from '../src/moduls/bloggers-platform/blogs/api/view-dto/blogs.view-dto';
+import { BasicAuthGuard } from '../src/moduls/user-accounts/guards/basic/basic-auth.guard';
 
 describe('blogs', () => {
   let app: INestApplication;
   let blogTestManager: BlogsTestManager;
   beforeAll(async () => {
     const result = await initSettings((moduleBuilder) => {
-      moduleBuilder.overrideProvider(JwtService).useValue(
-        new JwtService({
-          secret: 'access-token-secret',
-          signOptions: { expiresIn: '2s' },
-        }),
-      );
+      moduleBuilder
+        .overrideProvider(JwtService)
+        .useValue(
+          new JwtService({
+            secret: 'access-token-secret',
+            signOptions: { expiresIn: '2s' },
+          }),
+        )
+        .overrideGuard(BasicAuthGuard) // Мокаем Guard
+        .useValue({ canActivate: () => true });
     });
 
     app = result.app;

@@ -150,7 +150,6 @@ describe('posts', () => {
       shortDescription: 'Updated post shortDescription',
       content: 'Updated post content',
       blogId: createdBlog.id,
-      blogName: createdBlog.name,
     };
 
     //обновляем пост

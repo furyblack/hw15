@@ -8,6 +8,7 @@ import { deleteAllData } from './delete-all-data';
 import { BlogsTestManager } from './blogs-test-manager';
 import { PostsTestManager } from './posts-test-manager';
 import { AuthTestManager } from './auth-test-manager';
+import { BasicAuthGuard } from '../../src/moduls/user-accounts/guards/basic/basic-auth.guard';
 
 export const initSettings = async (
   //передаем callback, который получает ModuleBuilder, если хотим изменить настройку тестового модуля
@@ -16,6 +17,11 @@ export const initSettings = async (
   const testingModuleBuilder: TestingModuleBuilder = Test.createTestingModule({
     imports: [AppModule],
   });
+
+  // Базовый мок для Guard (может быть переопределен в addSettingsToModuleBuilder)
+  testingModuleBuilder
+    .overrideGuard(BasicAuthGuard)
+    .useValue({ canActivate: () => true });
 
   if (addSettingsToModuleBuilder) {
     addSettingsToModuleBuilder(testingModuleBuilder);
