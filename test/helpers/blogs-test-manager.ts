@@ -2,44 +2,42 @@ import { HttpStatus, INestApplication } from '@nestjs/common';
 import { CreateBlogDomainDto } from '../../src/moduls/bloggers-platform/blogs/dto/create-user.domain.dto';
 import { BlogsViewDto } from '../../src/moduls/bloggers-platform/blogs/api/view-dto/blogs.view-dto';
 import request from 'supertest';
-import { delay } from './delay';
-import { UpdateBlogDto } from '../../src/moduls/bloggers-platform/blogs/dto/create-blog.dto';
 
 export class BlogsTestManager {
   constructor(private app: INestApplication) {}
+
+  private readonly BASIC_CREDENTIALS = {
+    username: 'admin',
+    password: 'qwerty',
+  };
+
   async createBlog(
-    createModel: CreateBlogDomainDto,
-    statusCode: number = HttpStatus.CREATED,
+    data: CreateBlogDomainDto,
+    expectStatus: number = HttpStatus.CREATED,
   ): Promise<BlogsViewDto> {
     const response = await request(this.app.getHttpServer())
       .post('/api/blogs')
-      .send(createModel)
-      .expect(statusCode);
+      .auth(this.BASIC_CREDENTIALS.username, this.BASIC_CREDENTIALS.password, {
+        type: 'basic',
+      })
+      .send(data)
+      .expect(expectStatus);
+
     return response.body;
   }
-  async createSeveralBlogs(count: number): Promise<BlogsViewDto[]> {
-    const blogsPromises = [] as Promise<BlogsViewDto>[];
-    for (let i = 0; i < count; ++i) {
-      await delay(50);
-      const response = this.createBlog({
-        name: 'string' + i,
-        description: `string${i}`,
 
-        websiteUrl:
-          'https://p.7H1rV.DE-7hHrXZ9-ecNVheetttF66YKCJ_-gjJz1zDp0fQ6Yk1RCgUP00kPHQQ-ZuYOna0386PCmCt6VFpYShwgjX',
-      });
-      blogsPromises.push(response);
-    }
-    return Promise.all(blogsPromises);
+  async createBlogUnauthorized(data: CreateBlogDomainDto) {
+    return request(this.getHttpServer()).post('/api/blogs').send(data);
   }
-  async deleteBlog(id: string) {
-    const server = this.app.getHttpServer();
-    await request(server).delete(`/api/blogs/${id}`).expect(204);
+
+  async createBlogWithInvalidAuth(data: CreateBlogDomainDto) {
+    return request(this.getHttpServer())
+      .post('/api/blogs')
+      .auth('wrong', 'credentials', { type: 'basic' })
+      .send(data);
   }
-  async updateBlog(id: string, updateBody: UpdateBlogDto): Promise<void> {
-    await request(this.app.getHttpServer())
-      .put(`/api/blogs/${id}`)
-      .send(updateBody)
-      .expect(HttpStatus.NO_CONTENT);
+
+  private getHttpServer() {
+    return this.app.getHttpServer();
   }
 }

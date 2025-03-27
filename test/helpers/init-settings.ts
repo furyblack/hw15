@@ -3,53 +3,25 @@ import { AppModule } from '../../src/app.module';
 import { appSetup } from '../../src/setup/app.setup';
 import { Connection } from 'mongoose';
 import { getConnectionToken } from '@nestjs/mongoose';
-import { UsersTestManager } from './users-test-manager';
 import { deleteAllData } from './delete-all-data';
-import { BlogsTestManager } from './blogs-test-manager';
-import { PostsTestManager } from './posts-test-manager';
-import { AuthTestManager } from './auth-test-manager';
-import { BasicAuthGuard } from '../../src/moduls/user-accounts/guards/basic/basic-auth.guard';
 
-export const initSettings = async (
-  //передаем callback, который получает ModuleBuilder, если хотим изменить настройку тестового модуля
-  addSettingsToModuleBuilder?: (moduleBuilder: TestingModuleBuilder) => void,
-) => {
+export const initSettings = async () => {
   const testingModuleBuilder: TestingModuleBuilder = Test.createTestingModule({
     imports: [AppModule],
   });
 
-  // Базовый мок для Guard (может быть переопределен в addSettingsToModuleBuilder)
-  testingModuleBuilder
-    .overrideGuard(BasicAuthGuard)
-    .useValue({ canActivate: () => true });
-
-  if (addSettingsToModuleBuilder) {
-    addSettingsToModuleBuilder(testingModuleBuilder);
-  }
-
   const testingAppModule = await testingModuleBuilder.compile();
 
   const app = testingAppModule.createNestApplication();
-
   appSetup(app);
 
   await app.init();
   const databaseConnection = app.get<Connection>(getConnectionToken());
-  const httpServer = app.getHttpServer();
-  const userTestManger = new UsersTestManager(app);
-  const blogTestManager = new BlogsTestManager(app);
-  const postTestManager = new PostsTestManager(app, blogTestManager);
-  const authTestManager = new AuthTestManager(app);
 
   await deleteAllData(app);
 
   return {
     app,
     databaseConnection,
-    httpServer,
-    userTestManger,
-    blogTestManager,
-    postTestManager,
-    authTestManager,
   };
 };
