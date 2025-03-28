@@ -15,21 +15,30 @@ export class PostsTestManager {
     private readonly blogTestManager: BlogsTestManager,
   ) {}
 
+  private getAccessToken(): string {
+    // Здесь должна быть логика получения токена
+    // Например, через AuthTestManager
+    return 'valid-access-token';
+  }
+
   async createPost(
     createModel: CreatePostDto,
     statusCode: number = HttpStatus.CREATED,
+    token?: string,
   ): Promise<PostsViewDto> {
     const response = await request(this.app.getHttpServer())
       .post('/api/posts')
+      .set('Authorization', `Bearer ${token || this.getAccessToken()}`)
       .send(createModel)
       .expect(statusCode);
     return response.body;
   }
+
   async createSeveralPosts(
     count: number,
     blogId?: string,
+    token?: string,
   ): Promise<PostsViewDto[]> {
-    // Если blogId не передан, создаем новый блог
     if (!blogId) {
       const blogBody: CreateBlogDto = {
         name: 'Default Blog',
@@ -43,25 +52,37 @@ export class PostsTestManager {
     const postsPromises = [] as Promise<PostsViewDto>[];
     for (let i = 0; i < count; ++i) {
       await delay(50);
-      const response = this.createPost({
-        title: `Post ${i + 1}`,
-        shortDescription: 'Short description',
-        content: 'Content',
-        blogId,
-      });
+      const response = this.createPost(
+        {
+          title: `Post ${i + 1}`,
+          shortDescription: 'Short description',
+          content: 'Content',
+          blogId,
+        },
+        HttpStatus.CREATED,
+        token,
+      );
       postsPromises.push(response);
     }
 
-    // Ждем, пока все посты будут созданы
     return Promise.all(postsPromises);
   }
-  async deletePost(postId: string): Promise<void> {
-    const server = this.app.getHttpServer();
-    await request(server).delete(`/api/posts/${postId}`).expect(204);
+
+  async deletePost(postId: string, token?: string): Promise<void> {
+    await request(this.app.getHttpServer())
+      .delete(`/api/posts/${postId}`)
+      .set('Authorization', `Bearer ${token || this.getAccessToken()}`)
+      .expect(HttpStatus.NO_CONTENT);
   }
-  async updatePost(postId: string, updateBody: UpdatePostDto): Promise<void> {
+
+  async updatePost(
+    postId: string,
+    updateBody: UpdatePostDto,
+    token?: string,
+  ): Promise<void> {
     await request(this.app.getHttpServer())
       .put(`/api/posts/${postId}`)
+      .set('Authorization', `Bearer ${token || this.getAccessToken()}`)
       .send(updateBody)
       .expect(HttpStatus.NO_CONTENT);
   }
