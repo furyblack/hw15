@@ -1,7 +1,8 @@
 import { HttpStatus, INestApplication } from '@nestjs/common';
 import { CreateBlogDomainDto } from '../../src/moduls/bloggers-platform/blogs/dto/create-user.domain.dto';
-import { BlogsViewDto } from '../../src/moduls/bloggers-platform/blogs/api/view-dto/blogs.view-dto';
 import request from 'supertest';
+import { CreateBlogDto } from '../../src/moduls/bloggers-platform/blogs/dto/create-blog.dto';
+import { BlogsViewDto } from '../../src/moduls/bloggers-platform/blogs/api/view-dto/blogs.view-dto';
 
 export class BlogsTestManager {
   constructor(private app: INestApplication) {}
@@ -12,16 +13,15 @@ export class BlogsTestManager {
   };
 
   async createBlog(
-    data: CreateBlogDomainDto,
-    expectStatus: number = HttpStatus.CREATED,
+    createModel: CreateBlogDto,
+    accessToken: string,
+    expectedStatus: number = HttpStatus.CREATED,
   ): Promise<BlogsViewDto> {
     const response = await request(this.app.getHttpServer())
       .post('/api/blogs')
-      .auth(this.BASIC_CREDENTIALS.username, this.BASIC_CREDENTIALS.password, {
-        type: 'basic',
-      })
-      .send(data)
-      .expect(expectStatus);
+      .set('Authorization', `Bearer ${accessToken}`)
+      .send(createModel)
+      .expect(expectedStatus);
 
     return response.body;
   }

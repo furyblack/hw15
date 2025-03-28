@@ -6,6 +6,9 @@ import { getConnectionToken } from '@nestjs/mongoose';
 import { deleteAllData } from './delete-all-data';
 import { AuthTestManager } from './auth-test-manager';
 import { EmailService } from '../../src/moduls/notifications/email.service';
+import { BlogsTestManager } from './blogs-test-manager';
+import { PostsTestManager } from './posts-test-manager';
+import { UsersTestManager } from './users-test-manager';
 
 export const initSettings = async (
   configureModule?: (moduleBuilder: TestingModuleBuilder) => void,
@@ -14,9 +17,10 @@ export const initSettings = async (
     imports: [AppModule],
   });
 
-  // Мокаем EmailService
   testingModuleBuilder.overrideProvider(EmailService).useValue({
-    sendConfirmationEmail: jest.fn().mockResolvedValue(true),
+    sendConfirmationEmail: jest
+      .fn()
+      .mockImplementation(() => Promise.resolve()),
   });
 
   if (configureModule) {
@@ -37,5 +41,9 @@ export const initSettings = async (
     app,
     databaseConnection,
     authTestManager: new AuthTestManager(app, emailService),
+    usersTestManager: new UsersTestManager(app),
+    blogsTestManager: new BlogsTestManager(app),
+    postsTestManager: new PostsTestManager(app),
+    userTestManger: new UsersTestManager(app),
   };
 };

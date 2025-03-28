@@ -1,89 +1,77 @@
 import { HttpStatus, INestApplication } from '@nestjs/common';
 import request from 'supertest';
+import { CreatePostDto } from '../../src/moduls/bloggers-platform/posts/dto/create-post.dto';
 import { PostsViewDto } from '../../src/moduls/bloggers-platform/posts/api/view-dto/posts.view-dto';
-import {
-  CreatePostDto,
-  UpdatePostDto,
-} from '../../src/moduls/bloggers-platform/posts/dto/create-post.dto';
-import { delay } from './delay';
-import { CreateBlogDto } from '../../src/moduls/bloggers-platform/blogs/dto/create-blog.dto';
-import { BlogsTestManager } from './blogs-test-manager';
+import { UpdatePostDto } from '../../src/moduls/bloggers-platform/posts/dto/create-post.dto';
 
 export class PostsTestManager {
-  constructor(
-    private app: INestApplication,
-    private readonly blogTestManager: BlogsTestManager,
-  ) {}
-
-  private getAccessToken(): string {
-    // Здесь должна быть логика получения токена
-    // Например, через AuthTestManager
-    return 'valid-access-token';
-  }
+  constructor(private readonly app: INestApplication) {}
 
   async createPost(
     createModel: CreatePostDto,
-    statusCode: number = HttpStatus.CREATED,
-    token?: string,
+    accessToken: string,
+    expectedStatus: number = HttpStatus.CREATED,
   ): Promise<PostsViewDto> {
     const response = await request(this.app.getHttpServer())
       .post('/api/posts')
-      .set('Authorization', `Bearer ${token || this.getAccessToken()}`)
+      .set('Authorization', accessToken)
       .send(createModel)
-      .expect(statusCode);
+      .expect(expectedStatus);
+
     return response.body;
-  }
-
-  async createSeveralPosts(
-    count: number,
-    blogId?: string,
-    token?: string,
-  ): Promise<PostsViewDto[]> {
-    if (!blogId) {
-      const blogBody: CreateBlogDto = {
-        name: 'Default Blog',
-        description: 'Default Description',
-        websiteUrl: 'https://example.com',
-      };
-      const createdBlog = await this.blogTestManager.createBlog(blogBody);
-      blogId = createdBlog.id;
-    }
-
-    const postsPromises = [] as Promise<PostsViewDto>[];
-    for (let i = 0; i < count; ++i) {
-      await delay(50);
-      const response = this.createPost(
-        {
-          title: `Post ${i + 1}`,
-          shortDescription: 'Short description',
-          content: 'Content',
-          blogId,
-        },
-        HttpStatus.CREATED,
-        token,
-      );
-      postsPromises.push(response);
-    }
-
-    return Promise.all(postsPromises);
-  }
-
-  async deletePost(postId: string, token?: string): Promise<void> {
-    await request(this.app.getHttpServer())
-      .delete(`/api/posts/${postId}`)
-      .set('Authorization', `Bearer ${token || this.getAccessToken()}`)
-      .expect(HttpStatus.NO_CONTENT);
   }
 
   async updatePost(
     postId: string,
-    updateBody: UpdatePostDto,
-    token?: string,
+    updateData: UpdatePostDto,
+    accessToken: string,
+    expectedStatus: number = HttpStatus.NO_CONTENT,
   ): Promise<void> {
     await request(this.app.getHttpServer())
       .put(`/api/posts/${postId}`)
-      .set('Authorization', `Bearer ${token || this.getAccessToken()}`)
-      .send(updateBody)
-      .expect(HttpStatus.NO_CONTENT);
+      .set('Authorization', accessToken)
+      .send(updateData)
+      .expect(expectedStatus);
+  }
+
+  async deletePost(
+    postId: string,
+    accessToken: string,
+    expectedStatus: number = HttpStatus.NO_CONTENT,
+  ): Promise<void> {
+    await request(this.app.getHttpServer())
+      .delete(`/api/posts/${postId}`)
+      .set('Authorization', accessToken)
+      .expect(expectedStatus);
+  }
+
+  async getPostById(
+    postId: string,
+    accessToken?: string,
+    expectedStatus: number = HttpStatus.OK,
+  ): Promise<PostsViewDto> {
+    const requestBuilder = request(this.app.getHttpServer()).get(
+      `/api/posts/${postId}`,
+    );
+
+    if (accessToken) {
+      requestBuilder.set('Authorization', accessToken);
+    }
+
+    const response = await requestBuilder.expect(expectedStatus);
+    return response.body;
+  }
+
+  async likePost(
+    postId: string,
+    likeStatus: 'Like' | 'Dislike' | 'None',
+    accessToken: string,
+    expectedStatus: number = HttpStatus.NO_CONTENT,
+  ): Promise<void> {
+    await request(this.app.getHttpServer())
+      .put(`/api/posts/${postId}/like-status`)
+      .set('Authorization', accessToken)
+      .send({ likeStatus })
+      .expect(expectedStatus);
   }
 }
