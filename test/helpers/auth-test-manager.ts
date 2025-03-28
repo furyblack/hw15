@@ -13,7 +13,10 @@ export class AuthTestManager {
     registerModel: CreateUserDto,
     expectedStatus: number = HttpStatus.NO_CONTENT,
   ): Promise<void> {
-    jest.spyOn(this.emailService, 'sendConfirmationEmail').mockResolvedValue();
+    // Мокаем без resolvedValue(true), если сервис ожидает void
+    jest
+      .spyOn(this.emailService, 'sendConfirmationEmail')
+      .mockImplementation(() => Promise.resolve());
 
     await request(this.app.getHttpServer())
       .post('/api/auth/registration')
@@ -22,24 +25,18 @@ export class AuthTestManager {
   }
 
   async login(
-    credentials: { loginOrEmail: string; password: string }, // Изменено с login на loginOrEmail
+    credentials: { loginOrEmail: string; password: string },
     expectedStatus: number = HttpStatus.OK,
   ): Promise<{ accessToken: string; refreshToken?: string }> {
     const response = await request(this.app.getHttpServer())
       .post('/api/auth/login')
       .send({
-        loginOrEmail: credentials.loginOrEmail, // Соответствует LocalStrategy
+        loginOrEmail: credentials.loginOrEmail,
         password: credentials.password,
       })
       .expect(expectedStatus);
 
-    let refreshToken;
-    if (response.headers['set-cookie']) {
-      refreshToken = response.headers['set-cookie'][0]
-        .split(';')[0]
-        .split('=')[1];
-    }
-
+    const refreshToken = this.extractRefreshToken(response);
     return {
       accessToken: response.body?.accessToken,
       refreshToken,
@@ -51,5 +48,12 @@ export class AuthTestManager {
       .get('/api/auth/me')
       .set('Authorization', `Bearer ${accessToken}`)
       .expect(expectedStatus);
+  }
+
+  private extractRefreshToken(response: request.Response): string | undefined {
+    const cookieHeader = response.headers['set-cookie']?.[0];
+    if (!cookieHeader) return undefined;
+
+    return cookieHeader.split(';')[0].split('=')[1];
   }
 }
