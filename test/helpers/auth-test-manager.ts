@@ -1,34 +1,55 @@
 import { HttpStatus, INestApplication } from '@nestjs/common';
-import { CreateUserDto } from '../../src/moduls/user-accounts/dto/create-user.dto';
-import { UserViewDto } from '../../src/moduls/user-accounts/api/view-dto/users.view-dto';
 import request from 'supertest';
+import { CreateUserDto } from '../../src/moduls/user-accounts/dto/create-user.dto';
+import { EmailService } from '../../src/moduls/notifications/email.service';
 
 export class AuthTestManager {
   constructor(
     private app: INestApplication,
-    // private readonly userTestManager: UsersTestManager,
+    private emailService: EmailService,
   ) {}
-  // async registrationUser(dto: CreateUserDto): Promise<void> {
-  //   const createdUserId = await this.userTestManager.createUser(dto);
-  //   const confirmCode = 'uuid';
-  //
-  //   const user = await this.userTestManager.findUserById(createdUserId);
-  //   user.setConfirmationCode(confirmCode);
-  //   await this.usersRepository.save(user);
-  //
-  //   this.emailService
-  //     .sendConfirmationEmail(user.email, confirmCode)
-  //     .catch(console.error);
-  // }
 
   async registerUser(
     registerModel: CreateUserDto,
-    statusCode: number = HttpStatus.CREATED,
-  ): Promise<UserViewDto> {
-    const response = await request(this.app.getHttpServer())
+    expectedStatus: number = HttpStatus.NO_CONTENT,
+  ): Promise<void> {
+    jest.spyOn(this.emailService, 'sendConfirmationEmail').mockResolvedValue();
+
+    await request(this.app.getHttpServer())
       .post('/api/auth/registration')
       .send(registerModel)
-      .expect(statusCode);
-    return response.body;
+      .expect(expectedStatus);
+  }
+
+  async login(
+    credentials: { loginOrEmail: string; password: string }, // Изменено с login на loginOrEmail
+    expectedStatus: number = HttpStatus.OK,
+  ): Promise<{ accessToken: string; refreshToken?: string }> {
+    const response = await request(this.app.getHttpServer())
+      .post('/api/auth/login')
+      .send({
+        loginOrEmail: credentials.loginOrEmail, // Соответствует LocalStrategy
+        password: credentials.password,
+      })
+      .expect(expectedStatus);
+
+    let refreshToken;
+    if (response.headers['set-cookie']) {
+      refreshToken = response.headers['set-cookie'][0]
+        .split(';')[0]
+        .split('=')[1];
+    }
+
+    return {
+      accessToken: response.body?.accessToken,
+      refreshToken,
+    };
+  }
+
+  async getMe(accessToken: string, expectedStatus: number = HttpStatus.OK) {
+    return request(this.app.getHttpServer())
+      .get('/api/auth/me')
+      .set('Authorization', `Bearer ${accessToken}`)
+      .expect(expectedStatus);
   }
 }
