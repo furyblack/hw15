@@ -70,9 +70,9 @@ describe('users', () => {
     };
 
     const createdUser = await userTestManger.createUser(body);
-    //удаляем пользователя
+    // удаляем пользователя
     await userTestManger.deleteUser(createdUser.id);
-    //проверяем что удалился
+    // проверяем что удалился
     const server = app.getHttpServer();
     await request(server)
       .get(`/api/users/${createdUser.id}`)
