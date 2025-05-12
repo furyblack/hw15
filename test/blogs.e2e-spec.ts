@@ -22,7 +22,7 @@ describe('BlogsController (e2e)', () => {
       description: 'Valid description with more than 10 characters',
       websiteUrl: 'https://valid-url.com',
     };
-
+    //comment for fun
     it('should create blog successfully with valid data and auth', async () => {
       const response = await request(app.getHttpServer())
         .post('/api/blogs')
