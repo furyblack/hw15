@@ -57,7 +57,6 @@ describe('users', () => {
     expect(responseBody.totalCount).toBe(12);
     expect(responseBody.items).toHaveLength(2);
     expect(responseBody.pagesCount).toBe(2);
-    //asc sorting
     expect(responseBody.items[1]).toEqual(users[users.length - 1]);
     //etc...
   });
