@@ -30,6 +30,7 @@ export class UsersController {
     private userCreateUseCase: CreateUserUseCase,
     private deleteUserUseCase: DeleteUserUseCase,
   ) {}
+
   @Public()
   @Get()
   async getAll(
